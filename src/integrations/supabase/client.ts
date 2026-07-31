@@ -33,11 +33,10 @@ function createSupabaseClient() {
   let SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
   let SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
 
-  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-    console.warn("[Supabase] Environment variables are missing. App is running in demo/offline mode. Please configure SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY in your settings.");
-    // Use fallback credentials so createClient does not crash the client initialization
-    SUPABASE_URL = "https://placeholder-project.supabase.co";
-    SUPABASE_PUBLISHABLE_KEY = "sb_publishable_placeholder_key_please_configure_env_vars";
+  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY || SUPABASE_URL.includes("placeholder") || SUPABASE_URL.includes("bdbcvyjmgozlpranotkr")) {
+    console.warn("[Supabase] Environment variables are missing or point to old project. Using hardcoded project settings.");
+    SUPABASE_URL = "https://bdsovysmgozrpfdnokxr.supabase.co";
+    SUPABASE_PUBLISHABLE_KEY = "sb_publishable_KrYaPjwgJskg6cDFVrukcA_m75tvrQ3";
   }
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
