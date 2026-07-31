@@ -1,12 +1,21 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { UserPlus, Trash2 } from "lucide-react";
 
 import { EmptyState, ErrorState, PageHeader, SkeletonCards } from "@/components/app/ui-states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -44,6 +53,61 @@ function TeamPage() {
   const tasks = useTasks();
   const queryClient = useQueryClient();
   const [query, setQuery] = useState("");
+
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<AppRole>("member");
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
+
+  const invitations = useQuery({
+    queryKey: ["invitations", workspace?.org.id],
+    enabled: Boolean(workspace?.org.id),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("invitations")
+        .select("id, email, role, created_at")
+        .eq("organization_id", workspace!.org.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const inviteMember = useMutation({
+    mutationFn: async ({ email, role }: { email: string; role: AppRole }) => {
+      const { error: inviteError } = await supabase
+        .from("invitations")
+        .insert({
+          organization_id: workspace!.org.id,
+          email: email.trim().toLowerCase(),
+          role,
+          invited_by: workspace!.userId,
+        });
+      if (inviteError) throw inviteError;
+    },
+    onSuccess: () => {
+      toast.success("Invitation sent");
+      setIsInviteOpen(false);
+      setInviteEmail("");
+      setInviteRole("member");
+      void invitations.refetch();
+    },
+    onError: (mutationError: Error) => toast.error(mutationError.message),
+  });
+
+  const revokeInvitation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error: revokeError } = await supabase
+        .from("invitations")
+        .delete()
+        .eq("id", id);
+      if (revokeError) throw revokeError;
+    },
+    onSuccess: () => {
+      toast.success("Invitation revoked");
+      void invitations.refetch();
+    },
+    onError: (mutationError: Error) => toast.error(mutationError.message),
+  });
 
   const load = useMemo(() => {
     const map = new Map<string, { open: number; done: number }>();
@@ -90,13 +154,21 @@ function TeamPage() {
         title="Team"
         description="Roles control what each teammate can see and change. Workload is calculated live from open tasks."
         actions={
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search people…"
-            aria-label="Search team members"
-            className="h-9 w-56"
-          />
+          <>
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search people…"
+              aria-label="Search team members"
+              className="h-9 w-56"
+            />
+            {can("invite_members") && (
+              <Button size="sm" onClick={() => setIsInviteOpen(true)} className="gap-2">
+                <UserPlus className="h-4 w-4" />
+                Invite teammate
+              </Button>
+            )}
+          </>
         }
       />
 
@@ -160,6 +232,105 @@ function TeamPage() {
           </Table>
         </div>
       )}
+
+      {invitations.data && invitations.data.length > 0 && (
+        <div className="space-y-4 pt-4">
+          <h2 className="text-lg font-semibold tracking-tight">Pending Invitations</h2>
+          <div className="rounded-lg border border-border bg-card">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {invitations.data.map((invite) => (
+                  <TableRow key={invite.id}>
+                    <TableCell className="font-medium">{invite.email}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{titleCase(invite.role)}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {can("invite_members") && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-destructive hover:bg-destructive/10 hover:text-destructive gap-1"
+                          onClick={() => revokeInvitation.mutate(invite.id)}
+                          disabled={revokeInvitation.isPending}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          Revoke
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
+
+      <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite teammate</DialogTitle>
+            <DialogDescription>
+              Send an invitation to join {workspace?.org.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!inviteEmail.trim()) return;
+              inviteMember.mutate({ email: inviteEmail, role: inviteRole });
+            }}
+            className="space-y-4 pt-4"
+          >
+            <div className="space-y-2">
+              <Label htmlFor="invite-email">Work email</Label>
+              <Input
+                id="invite-email"
+                type="email"
+                placeholder="teammate@company.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invite-role">Role</Label>
+              <Select
+                value={inviteRole}
+                onValueChange={(val) => setInviteRole(val as AppRole)}
+              >
+                <SelectTrigger id="invite-role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLES.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {titleCase(role)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button type="button" variant="outline" onClick={() => setIsInviteOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={inviteMember.isPending}>
+                {inviteMember.isPending ? "Sending..." : "Send invitation"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
