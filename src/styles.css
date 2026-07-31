@@ -1,0 +1,310 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * ORBIT — "Deep Harbour" control-surface system.
+ * Cool navy ink on slate mist, iris as the single decision colour,
+ * harbour-teal for healthy signals, brass for attention. Contained
+ * layouts, soft elevation, tight vertical rhythm — no hairline grid.
+ */
+
+@theme inline {
+  --font-sans: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Sora", "Inter Tight", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 10px);
+  --radius-3xl: calc(var(--radius) + 16px);
+  --radius-4xl: calc(var(--radius) + 24px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-signal: var(--signal);
+  --color-signal-foreground: var(--signal-foreground);
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
+  --color-brand: var(--signal);
+  --color-brand-foreground: var(--signal-foreground);
+  --color-border: var(--border);
+  --color-rule: var(--rule);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --shadow-plate: 0 1px 2px oklch(0.22 0.04 264 / 0.06), 0 8px 20px -14px oklch(0.22 0.04 264 / 0.25);
+  --shadow-lift: 0 2px 6px oklch(0.22 0.04 264 / 0.08), 0 18px 36px -22px oklch(0.22 0.04 264 / 0.4);
+}
+
+:root {
+  --radius: 12px;
+
+  /* Slate mist / harbour ink */
+  --background: oklch(0.973 0.005 260);
+  --foreground: oklch(0.235 0.032 264);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.235 0.032 264);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.235 0.032 264);
+
+  --primary: oklch(0.53 0.208 279);
+  --primary-foreground: oklch(0.985 0.005 280);
+  --secondary: oklch(0.948 0.008 262);
+  --secondary-foreground: oklch(0.3 0.03 264);
+  --muted: oklch(0.951 0.008 262);
+  --muted-foreground: oklch(0.523 0.024 264);
+  --accent: oklch(0.938 0.02 279);
+  --accent-foreground: oklch(0.35 0.09 279);
+
+  /* Iris — the single decision colour */
+  --signal: oklch(0.53 0.208 279);
+  --signal-foreground: oklch(0.985 0.005 280);
+  --ink: oklch(0.235 0.032 264);
+  --ink-foreground: oklch(0.975 0.006 262);
+
+  --destructive: oklch(0.55 0.2 22);
+  --destructive-foreground: oklch(0.985 0.005 280);
+  --success: oklch(0.58 0.098 191);
+  --success-foreground: oklch(0.985 0.005 280);
+  --warning: oklch(0.72 0.13 76);
+  --warning-foreground: oklch(0.235 0.032 264);
+
+  --border: oklch(0.902 0.01 262);
+  --rule: oklch(0.928 0.008 262);
+  --input: oklch(0.885 0.012 262);
+  --ring: oklch(0.53 0.208 279);
+
+  --chart-1: oklch(0.53 0.208 279);
+  --chart-2: oklch(0.58 0.098 191);
+  --chart-3: oklch(0.72 0.13 76);
+  --chart-4: oklch(0.4 0.05 264);
+  --chart-5: oklch(0.7 0.05 279);
+
+  --sidebar: oklch(0.988 0.003 262);
+  --sidebar-foreground: oklch(0.235 0.032 264);
+  --sidebar-primary: oklch(0.53 0.208 279);
+  --sidebar-primary-foreground: oklch(0.985 0.005 280);
+  --sidebar-accent: oklch(0.945 0.014 279);
+  --sidebar-accent-foreground: oklch(0.33 0.08 279);
+  --sidebar-border: oklch(0.902 0.01 262);
+  --sidebar-ring: oklch(0.53 0.208 279);
+}
+
+/* Dark is authored as a night harbour, not an inversion. */
+.dark {
+  --background: oklch(0.201 0.024 265);
+  --foreground: oklch(0.955 0.006 262);
+  --card: oklch(0.243 0.026 265);
+  --card-foreground: oklch(0.955 0.006 262);
+  --popover: oklch(0.253 0.026 265);
+  --popover-foreground: oklch(0.955 0.006 262);
+
+  --primary: oklch(0.68 0.165 281);
+  --primary-foreground: oklch(0.18 0.03 265);
+  --secondary: oklch(0.283 0.026 265);
+  --secondary-foreground: oklch(0.955 0.006 262);
+  --muted: oklch(0.28 0.024 265);
+  --muted-foreground: oklch(0.735 0.018 262);
+  --accent: oklch(0.315 0.05 279);
+  --accent-foreground: oklch(0.94 0.02 279);
+
+  --signal: oklch(0.68 0.165 281);
+  --signal-foreground: oklch(0.18 0.03 265);
+  --ink: oklch(0.955 0.006 262);
+  --ink-foreground: oklch(0.201 0.024 265);
+
+  --destructive: oklch(0.65 0.19 24);
+  --destructive-foreground: oklch(0.18 0.03 265);
+  --success: oklch(0.72 0.1 191);
+  --success-foreground: oklch(0.18 0.03 265);
+  --warning: oklch(0.81 0.13 78);
+  --warning-foreground: oklch(0.18 0.03 265);
+
+  --border: oklch(0.335 0.024 265);
+  --rule: oklch(0.3 0.022 265);
+  --input: oklch(0.38 0.024 265);
+  --ring: oklch(0.68 0.165 281);
+
+  --chart-1: oklch(0.68 0.165 281);
+  --chart-2: oklch(0.72 0.1 191);
+  --chart-3: oklch(0.81 0.13 78);
+  --chart-4: oklch(0.8 0.02 262);
+  --chart-5: oklch(0.55 0.09 281);
+
+  --sidebar: oklch(0.221 0.025 265);
+  --sidebar-foreground: oklch(0.955 0.006 262);
+  --sidebar-primary: oklch(0.68 0.165 281);
+  --sidebar-primary-foreground: oklch(0.18 0.03 265);
+  --sidebar-accent: oklch(0.3 0.04 279);
+  --sidebar-accent-foreground: oklch(0.94 0.02 279);
+  --sidebar-border: oklch(0.335 0.024 265);
+  --sidebar-ring: oklch(0.68 0.165 281);
+}
+
+@layer base {
+  html {
+    scroll-padding-top: 72px;
+  }
+
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.022em;
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+}
+
+/* Small uppercase mono tag for categories and data labels. */
+@utility label-mono {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@utility display-xl {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 1.5rem + 3.4vw, 4.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+@utility display-lg {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.2rem + 2vw, 2.75rem);
+  line-height: 1.08;
+  letter-spacing: -0.026em;
+  font-weight: 700;
+}
+
+/* Signature: the status rail — a thin iris gradient spine marking live surfaces. */
+@utility signal-rail {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 12px auto 12px 0;
+    width: 3px;
+    border-radius: 999px;
+    background: linear-gradient(
+      to bottom,
+      var(--color-signal),
+      color-mix(in oklch, var(--color-signal) 15%, transparent)
+    );
+  }
+}
+
+@utility surface {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-plate);
+}
+
+@utility surface-hover {
+  transition: transform 160ms cubic-bezier(0.2, 0, 0, 1), box-shadow 160ms cubic-bezier(0.2, 0, 0, 1);
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lift);
+  }
+}
+
+/* Legacy aliases kept so app surfaces stay consistent with the new system. */
+@utility plate {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-plate);
+}
+
+@utility plate-press {
+  transition: transform 160ms cubic-bezier(0.2, 0, 0, 1), box-shadow 160ms cubic-bezier(0.2, 0, 0, 1);
+  &:hover {
+    box-shadow: var(--shadow-lift);
+  }
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+@utility rule-grid {
+  background-color: color-mix(in oklch, var(--color-secondary) 60%, transparent);
+}
+
+@utility hatch {
+  background-image: repeating-linear-gradient(
+    45deg,
+    color-mix(in oklch, var(--color-border) 80%, transparent) 0 1px,
+    transparent 1px 8px
+  );
+}
+
+@keyframes orbit-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@utility animate-rise {
+  animation: orbit-rise 0.42s cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
