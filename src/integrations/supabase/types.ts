@@ -137,6 +137,41 @@ export type Database = {
           },
         ]
       }
+      invitations: {
+        Row: {
+          id: string
+          organization_id: string
+          email: string
+          role: Database["public"]["Enums"]["app_role"]
+          invited_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          email: string
+          role?: Database["public"]["Enums"]["app_role"]
+          invited_by: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          email?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          invited_by?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           amount_cents: number

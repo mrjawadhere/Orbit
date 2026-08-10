@@ -11,14 +11,4 @@ export function createGeminiProvider(apiKey: string) {
   });
 }
 
-/** Lovable AI Gateway provider for the AI SDK. Server-only. */
-export function createLovableAiGatewayProvider(apiKey: string) {
-  return createOpenAICompatible({
-    name: "lovable",
-    baseURL: "https://ai.gateway.lovable.dev/v1",
-    headers: { "Lovable-API-Key": apiKey },
-  });
-}
-
-export const ORBIT_MODEL = "google/gemini-3.6-flash";
 export const GEMINI_DEFAULT_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";

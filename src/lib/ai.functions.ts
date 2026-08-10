@@ -17,6 +17,7 @@ const InsightInput = z.object({
   organizationId: z.string().uuid(),
   projectId: z.string().uuid().optional(),
   topic: z.string().max(400).optional(),
+  userApiKey: z.string().optional(),
 });
 
 const PROMPTS: Record<string, string> = {
@@ -68,24 +69,16 @@ export const generateInsight = createServerFn({ method: "POST" })
       ? (tasks.data ?? []).filter((t) => t.project_id === data.projectId)
       : (tasks.data ?? []);
 
-    const geminiKey = process.env.GEMINI_API_KEY;
-    const lovableKey = process.env.LOVABLE_API_KEY;
+    const geminiKey = data.userApiKey || process.env.GEMINI_API_KEY;
 
-    if (!geminiKey && !lovableKey) {
-      throw new Error("AI is not configured. Please set GEMINI_API_KEY or LOVABLE_API_KEY in your environment.");
+    if (!geminiKey) {
+      throw new Error("Gemini API key is not configured. Please add your Gemini API Key in Settings to enable AI features.");
     }
 
-    const { createGeminiProvider, createLovableAiGatewayProvider, GEMINI_DEFAULT_MODEL, ORBIT_MODEL } = await import("@/lib/ai-gateway.server");
+    const { createGeminiProvider, GEMINI_DEFAULT_MODEL } = await import("@/lib/ai-gateway.server");
 
-    let gateway;
-    let modelName;
-    if (geminiKey) {
-      gateway = createGeminiProvider(geminiKey);
-      modelName = GEMINI_DEFAULT_MODEL;
-    } else {
-      gateway = createLovableAiGatewayProvider(lovableKey!);
-      modelName = ORBIT_MODEL;
-    }
+    const gateway = createGeminiProvider(geminiKey);
+    const modelName = GEMINI_DEFAULT_MODEL;
 
     const context_json = JSON.stringify({
       today: new Date().toISOString().slice(0, 10),
@@ -95,20 +88,34 @@ export const generateInsight = createServerFn({ method: "POST" })
       topic: data.topic ?? null,
     });
 
-    const { text } = await generateText({
-      model: gateway(modelName),
-      system:
-        "You are Orbit AI, an analyst embedded in a project management workspace. Be specific, quantitative and brief. Use short markdown sections and bullet points. Never invent data that is not in the provided JSON.",
-      prompt: `${PROMPTS[data.kind]}\n\nWorkspace data (JSON):\n${context_json}`,
-    });
+    try {
+      const { text } = await generateText({
+        model: gateway(modelName),
+        system:
+          "You are Orbit AI, an analyst embedded in Digital Softs workspace. Be specific, quantitative and brief. Use short markdown sections and bullet points. Never invent data that is not in the provided JSON.",
+        prompt: `${PROMPTS[data.kind]}\n\nWorkspace data (JSON):\n${context_json}`,
+      });
 
-    await supabase.from("ai_history").insert({
-      organization_id: data.organizationId,
-      user_id: userId,
-      kind: data.kind,
-      prompt: data.topic ?? data.kind,
-      response: text,
-    });
+      await supabase.from("ai_history").insert({
+        organization_id: data.organizationId,
+        user_id: userId,
+        kind: data.kind,
+        prompt: data.topic ?? data.kind,
+        response: text,
+      });
 
-    return { text };
+      return { text };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (
+        msg.toLowerCase().includes("api key") ||
+        msg.includes("401") ||
+        msg.includes("403") ||
+        msg.includes("unauthorized") ||
+        msg.toLowerCase().includes("invalid")
+      ) {
+        throw new Error("Invalid Gemini API key. Please check or update your API key in Settings -> AI & Gemini API Key.");
+      }
+      throw err;
+    }
   });

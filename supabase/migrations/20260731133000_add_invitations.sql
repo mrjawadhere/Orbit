@@ -63,66 +63,64 @@ BEGIN
     -- Delete the consumed invitation
     DELETE FROM public.invitations WHERE lower(email) = lower(NEW.email);
   ELSE
-    -- Acme Studio onboarding setup
+    -- Digital Softs onboarding setup
     INSERT INTO public.organizations (name, slug, plan, created_by)
-    VALUES ('Acme Studio', 'acme-studio-' || substr(NEW.id::text, 1, 8), 'pro', NEW.id)
+    VALUES ('Digital Softs', 'digital-softs-' || substr(NEW.id::text, 1, 8), 'pro', NEW.id)
     RETURNING id INTO v_org;
 
     INSERT INTO public.memberships (organization_id, user_id, role) VALUES (v_org, NEW.id, 'owner');
 
     INSERT INTO public.subscriptions (organization_id, plan, seats, renews_at)
-    VALUES (v_org, 'pro', 12, CURRENT_DATE + 30);
+    VALUES (v_org, 'pro', 25, CURRENT_DATE + 30);
 
     INSERT INTO public.invoices (organization_id, number, amount_cents, status, issued_on) VALUES
-      (v_org, 'ORB-1043', 14400, 'paid', CURRENT_DATE - 30),
-      (v_org, 'ORB-1029', 14400, 'paid', CURRENT_DATE - 60),
-      (v_org, 'ORB-1012', 12000, 'paid', CURRENT_DATE - 90);
+      (v_org, 'DS-2026-08', 29000, 'paid', CURRENT_DATE - 30),
+      (v_org, 'DS-2026-07', 29000, 'paid', CURRENT_DATE - 60),
+      (v_org, 'DS-2026-06', 25000, 'paid', CURRENT_DATE - 90);
 
     INSERT INTO public.projects (organization_id, name, description, color, status, priority, owner_id, deadline, progress)
-    VALUES (v_org, 'Mobile Redesign', 'Rebuild the mobile experience around the new design system.', '#5B5CEB', 'active', 'high', NEW.id, CURRENT_DATE + 14, 67)
+    VALUES (v_org, 'Digital Softs Enterprise Suite', 'Next-gen enterprise software suite with real-time analytics, order tracking, and client portal.', '#5B5CEB', 'active', 'urgent', NEW.id, CURRENT_DATE + 14, 84)
     RETURNING id INTO v_p1;
     INSERT INTO public.projects (organization_id, name, description, color, status, priority, owner_id, deadline, progress)
-    VALUES (v_org, 'Billing Platform', 'Usage metering, invoices and plan upgrades.', '#7C3AED', 'active', 'urgent', NEW.id, CURRENT_DATE + 28, 42)
+    VALUES (v_org, 'Orbit AI Risk & Velocity Engine', 'Machine learning pipeline for predictive risk detection, automated task breakdown, and executive reports.', '#7C3AED', 'active', 'high', NEW.id, CURRENT_DATE + 28, 68)
     RETURNING id INTO v_p2;
     INSERT INTO public.projects (organization_id, name, description, color, status, priority, owner_id, deadline, progress)
-    VALUES (v_org, 'Growth Experiments', 'Onboarding funnel and activation tests.', '#00C2FF', 'planning', 'medium', NEW.id, CURRENT_DATE + 45, 18)
+    VALUES (v_org, 'Cloud DevOps & Zero-Trust Migration', 'AWS Elastic Kubernetes Service deployment with Terraform IaC, ArgoCD, and automated vulnerability scanning.', '#10B981', 'active', 'high', NEW.id, CURRENT_DATE + 10, 92)
     RETURNING id INTO v_p3;
     INSERT INTO public.projects (organization_id, name, description, color, status, priority, owner_id, deadline, progress)
-    VALUES (v_org, 'Enterprise Security', 'SSO, audit exports and data retention controls.', '#10B981', 'completed', 'high', NEW.id, CURRENT_DATE - 7, 100)
+    VALUES (v_org, 'FinTech Mobile App v3', 'Next-gen cross-platform React Native app with biometric authentication, card management, and push notifications.', '#00C2FF', 'active', 'urgent', NEW.id, CURRENT_DATE + 35, 50)
     RETURNING id INTO v_p4;
 
     INSERT INTO public.project_members (project_id, user_id, organization_id) VALUES
       (v_p1, NEW.id, v_org), (v_p2, NEW.id, v_org), (v_p3, NEW.id, v_org), (v_p4, NEW.id, v_org);
 
     INSERT INTO public.tasks (organization_id, project_id, title, description, status, priority, assignee_id, reporter_id, labels, due_date, estimated_hours, completed_hours, completed_at) VALUES
-      (v_org, v_p1, 'Empty states audit', 'Review every empty state and align with the new illustration set.', 'in_progress', 'high', NEW.id, NEW.id, ARRAY['design','ux'], CURRENT_DATE + 3, 8, 5, NULL),
-      (v_org, v_p1, 'Motion spec for navigation', 'Define transition curves and durations for the tab bar.', 'in_review', 'medium', NEW.id, NEW.id, ARRAY['design'], CURRENT_DATE + 5, 6, 6, NULL),
-      (v_org, v_p1, 'Ship dark mode tokens', 'Replace hardcoded colors with semantic tokens.', 'done', 'medium', NEW.id, NEW.id, ARRAY['frontend'], CURRENT_DATE - 2, 10, 9, now() - interval '2 days'),
-      (v_org, v_p2, 'Usage metering pipeline', 'Aggregate seat and task usage per organization daily.', 'in_progress', 'urgent', NEW.id, NEW.id, ARRAY['backend'], CURRENT_DATE + 6, 20, 11, NULL),
-      (v_org, v_p2, 'Invoice PDF templates', 'Branded invoice layout with tax fields.', 'todo', 'medium', NEW.id, NEW.id, ARRAY['backend','design'], CURRENT_DATE + 12, 12, NULL, NULL),
-      (v_org, v_p2, 'Plan upgrade flow', 'In-app upgrade with proration preview.', 'backlog', 'high', NULL, NEW.id, ARRAY['frontend'], CURRENT_DATE + 20, 16, NULL, NULL),
-      (v_org, v_p3, 'Onboarding checklist', 'Five-step activation checklist with progress.', 'in_progress', 'medium', NEW.id, NEW.id, ARRAY['growth'], CURRENT_DATE + 9, 9, 3, NULL),
-      (v_org, v_p3, 'Referral experiment brief', 'Define hypothesis and success metrics.', 'todo', 'low', NULL, NEW.id, ARRAY['growth'], CURRENT_DATE + 15, 4, NULL, NULL),
-      (v_org, v_p4, 'SAML SSO rollout', 'Enterprise identity provider support.', 'done', 'high', NEW.id, NEW.id, ARRAY['security'], CURRENT_DATE - 10, 24, 22, now() - interval '10 days'),
-      (v_org, v_p4, 'Audit log exports', 'CSV export of the full activity timeline.', 'done', 'medium', NEW.id, NEW.id, ARRAY['security'], CURRENT_DATE - 5, 14, 13, now() - interval '5 days'),
-      (v_org, v_p1, 'QA pass on iOS 18', 'Regression sweep before launch.', 'todo', 'urgent', NULL, NEW.id, ARRAY['qa'], CURRENT_DATE - 1, 8, NULL, NULL),
-      (v_org, v_p2, 'Dunning emails', 'Automate failed payment reminders.', 'backlog', 'low', NULL, NEW.id, ARRAY['backend'], CURRENT_DATE + 30, 6, NULL, NULL);
+      (v_org, v_p1, 'Zero-Trust IAM Role Audit', 'Audit row-level permissions and JWT validation policies across API endpoints.', 'in_progress', 'high', NEW.id, NEW.id, ARRAY['security','backend'], CURRENT_DATE + 3, 12, 7, NULL),
+      (v_org, v_p1, 'Kafka Event Bus Integration', 'Stream real-time enterprise events to downstream reporting microservices.', 'in_review', 'urgent', NEW.id, NEW.id, ARRAY['backend','architecture'], CURRENT_DATE + 5, 16, 16, NULL),
+      (v_org, v_p1, 'Dark Mode Semantic Tokens', 'Standardize typography and dark theme tokens across client workspace UI.', 'done', 'medium', NEW.id, NEW.id, ARRAY['frontend','design'], CURRENT_DATE - 2, 10, 10, now() - interval '2 days'),
+      (v_org, v_p2, 'Predictive Risk AI Model Fine-tuning', 'Train anomaly detection classifier on sprint velocity and task dependency trees.', 'in_progress', 'urgent', NEW.id, NEW.id, ARRAY['ai','python'], CURRENT_DATE + 6, 24, 15, NULL),
+      (v_org, v_p2, 'Automated Executive Report Generator', 'Generate PDF weekly summary reports formatted for stakeholder distribution.', 'todo', 'medium', NEW.id, NEW.id, ARRAY['ai','frontend'], CURRENT_DATE + 12, 14, NULL, NULL),
+      (v_org, v_p2, 'Task Generator Prompt Tuning', 'Refine system instructions for breaking product epics into actionable sprint tasks.', 'backlog', 'high', NULL, NEW.id, ARRAY['ai'], CURRENT_DATE + 20, 8, NULL, NULL),
+      (v_org, v_p3, 'Terraform EKS Multi-Region Failover', 'Implement active-passive failover with Route53 health checks and DB read-replicas.', 'done', 'high', NEW.id, NEW.id, ARRAY['devops','cloud'], CURRENT_DATE - 4, 30, 30, now() - interval '4 days'),
+      (v_org, v_p3, 'CI/CD Automated Security Scanning', 'Integrate SonarQube and Trivy container scanning into GitHub Actions workflow.', 'in_progress', 'medium', NEW.id, NEW.id, ARRAY['devops','security'], CURRENT_DATE + 7, 12, 6, NULL),
+      (v_org, v_p4, 'Biometric Auth Flow (FaceID / Fingerprint)', 'Implement Secure Enclave authentication layer for iOS 18 and Android 15.', 'todo', 'urgent', NULL, NEW.id, ARRAY['mobile','security'], CURRENT_DATE + 15, 20, NULL, NULL),
+      (v_org, v_p4, 'Load Testing API Gateways under 15k RPS', 'K6 load testing script for real-time wallet balance queries.', 'todo', 'high', NULL, NEW.id, ARRAY['qa','performance'], CURRENT_DATE + 18, 16, NULL, NULL);
 
     INSERT INTO public.activity_logs (organization_id, actor_id, action, entity_type, entity_id, summary) VALUES
-      (v_org, NEW.id, 'project.created', 'project', v_p1, 'Created project Mobile Redesign'),
-      (v_org, NEW.id, 'task.completed', 'task', NULL, 'Completed Ship dark mode tokens'),
-      (v_org, NEW.id, 'project.completed', 'project', v_p4, 'Marked Enterprise Security as completed'),
-      (v_org, NEW.id, 'member.invited', 'membership', NULL, 'Invited 3 teammates to Acme Studio'),
-      (v_org, NEW.id, 'settings.updated', 'organization', v_org, 'Updated workspace appearance settings');
+      (v_org, NEW.id, 'project.created', 'project', v_p1, 'Created project Digital Softs Enterprise Suite'),
+      (v_org, NEW.id, 'task.completed', 'task', NULL, 'Completed Dark Mode Semantic Tokens'),
+      (v_org, NEW.id, 'project.completed', 'project', v_p3, 'Deployed Cloud DevOps & Zero-Trust Migration to production'),
+      (v_org, NEW.id, 'member.invited', 'membership', NULL, 'Invited 5 engineering leads to Digital Softs'),
+      (v_org, NEW.id, 'settings.updated', 'organization', v_org, 'Updated workspace appearance & AI settings');
 
     INSERT INTO public.notifications (organization_id, user_id, type, title, body) VALUES
-      (v_org, NEW.id, 'task_assigned', 'You were assigned “Empty states audit”', 'Due in 3 days in Mobile Redesign.'),
-      (v_org, NEW.id, 'deadline', 'QA pass on iOS 18 is overdue', 'This task was due yesterday.'),
-      (v_org, NEW.id, 'project_completed', 'Enterprise Security is complete', 'All 12 tasks are done. Nice work.');
+      (v_org, NEW.id, 'task_assigned', 'You were assigned “Zero-Trust IAM Role Audit”', 'Due in 3 days in Digital Softs Enterprise Suite.'),
+      (v_org, NEW.id, 'deadline', 'Load Testing API Gateways is scheduled for this week', 'QA team is ready for benchmark run.'),
+      (v_org, NEW.id, 'project_completed', 'Cloud DevOps Migration milestone reached', 'All EKS terraform modules applied cleanly.');
 
     INSERT INTO public.ai_history (organization_id, user_id, kind, prompt, response) VALUES
-      (v_org, NEW.id, 'weekly_report', 'Summarize this week for the leadership update.',
-       'The team completed 42 tasks (+24% week over week). Mobile Redesign is 67% complete and on track; Billing Platform is at risk with two unassigned blockers. Recommend rebalancing QA before Friday.');
+      (v_org, NEW.id, 'weekly_report', 'Summarize this week for Digital Softs executive leadership.',
+       'Digital Softs completed 48 engineering tasks (+28% velocity WoW). Cloud DevOps Migration reached 92% completion with multi-region failover tested cleanly. FinTech Mobile App v3 is on track for beta deployment next month.');
 
     FOR i IN 0..29 LOOP
       INSERT INTO public.analytics_snapshots (organization_id, captured_on, tasks_completed, tasks_created, active_projects, completion_rate)

@@ -61,7 +61,7 @@ export function Hero() {
 
         <div className="surface overflow-hidden">
           <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-            <p className="label-mono text-muted-foreground">Acme Studio · Q3 delivery</p>
+            <p className="label-mono text-muted-foreground">Digital Softs · Q3 delivery</p>
             <span className="label-mono text-signal">Live</span>
           </div>
           <div className="p-4">

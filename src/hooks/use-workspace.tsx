@@ -62,7 +62,9 @@ async function loadWorkspace(preferredOrgId: string | null): Promise<Workspace |
   const organizations = (memberships ?? [])
     .map((m) => {
       const org = m.organizations as OrgSummary | null;
-      return org ? { ...org, role: m.role as AppRole } : null;
+      if (!org) return null;
+      const normalizedName = org.name === "Acme Studio" || org.name.toLowerCase().includes("acme") ? "Digital Softs" : org.name;
+      return { ...org, name: normalizedName, role: m.role as AppRole };
     })
     .filter((o): o is OrgSummary & { role: AppRole } => Boolean(o));
 

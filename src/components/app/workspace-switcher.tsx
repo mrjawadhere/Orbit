@@ -133,7 +133,7 @@ export function WorkspaceSwitcher({ onNavigate }: { onNavigate?: () => void }) {
                 id="org-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Northwind Labs"
+                placeholder="Digital Softs"
                 autoFocus
               />
             </div>

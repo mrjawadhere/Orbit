@@ -31,11 +31,16 @@ function SettingsPage() {
   const [fullName, setFullName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
   const [orgName, setOrgName] = useState("");
+  const [geminiKey, setGeminiKey] = useState("");
+  const [showKey, setShowKey] = useState(false);
 
   useEffect(() => {
     setFullName(workspace?.profile?.full_name ?? "");
     setJobTitle(workspace?.profile?.job_title ?? "");
     setOrgName(workspace?.org.name ?? "");
+    if (typeof window !== "undefined") {
+      setGeminiKey(window.localStorage.getItem("orbit_gemini_api_key") ?? "");
+    }
   }, [workspace]);
 
   const saveProfile = useMutation({
@@ -165,6 +170,84 @@ function SettingsPage() {
               {titleCase(option)}
             </Button>
           ))}
+        </div>
+      </Panel>
+
+      <Panel title="AI & Gemini API Key" description="Configure your Google Gemini API key to enable workspace summaries, risk analysis, and task generation.">
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+            <div>
+              <p className="text-sm font-medium">API Key Status</p>
+              <p className="text-xs text-muted-foreground">
+                {geminiKey.trim() ? "Custom key configured on this browser" : "Using system default key if configured"}
+              </p>
+            </div>
+            <Badge variant={geminiKey.trim() ? "default" : "outline"}>
+              {geminiKey.trim() ? "Custom Key Active" : "Default / Unconfigured"}
+            </Badge>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="gemini-key">Google Gemini API Key</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="gemini-key"
+                type={showKey ? "text" : "password"}
+                value={geminiKey}
+                onChange={(e) => setGeminiKey(e.target.value)}
+                placeholder="Enter your Gemini API key (e.g. AIzaSy...)"
+                className="font-mono text-sm"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowKey(!showKey)}
+              >
+                {showKey ? "Hide" : "Show"}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Don't have a key? You can get a free API key at{" "}
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noreferrer"
+                className="text-primary underline hover:text-primary/80"
+              >
+                Google AI Studio
+              </a>.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2 pt-2">
+            <Button
+              type="button"
+              onClick={() => {
+                if (!geminiKey.trim()) {
+                  toast.error("Please enter an API key first.");
+                  return;
+                }
+                window.localStorage.setItem("orbit_gemini_api_key", geminiKey.trim());
+                toast.success("Gemini API key saved to browser.");
+              }}
+            >
+              Save API Key
+            </Button>
+            {geminiKey ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  window.localStorage.removeItem("orbit_gemini_api_key");
+                  setGeminiKey("");
+                  toast.success("Gemini API key removed.");
+                }}
+              >
+                Remove Key
+              </Button>
+            ) : null}
+          </div>
         </div>
       </Panel>
 

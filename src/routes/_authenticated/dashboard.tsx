@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -89,11 +89,26 @@ function DashboardPage() {
     },
   });
 
+  const navigate = useNavigate();
   const runInsight = useServerFn(generateInsight);
   const insight = useMutation({
-    mutationFn: () => runInsight({ data: { kind: "dashboard_summary", organizationId: orgId! } }),
+    mutationFn: () => {
+      const userApiKey = typeof window !== "undefined" ? window.localStorage.getItem("orbit_gemini_api_key") || undefined : undefined;
+      return runInsight({ data: { kind: "dashboard_summary", organizationId: orgId!, userApiKey } });
+    },
     onSuccess: () => void latestInsight.refetch(),
-    onError: (error: Error) => toast.error(error.message || "Could not generate the summary."),
+    onError: (error: Error) => {
+      if (error.message?.includes("Settings") || error.message?.includes("API key")) {
+        toast.error(error.message, {
+          action: {
+            label: "Open Settings",
+            onClick: () => void navigate({ to: "/settings" }),
+          },
+        });
+      } else {
+        toast.error(error.message || "Could not generate the summary.");
+      }
+    },
   });
 
   const stats = useMemo(() => {

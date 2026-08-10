@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -42,6 +42,7 @@ const TOOLS: { kind: Kind; title: string; description: string; icon: typeof Spar
 ];
 
 function AiPage() {
+  const navigate = useNavigate();
   const { workspace } = useWorkspace();
   const orgId = workspace?.org.id;
   const [active, setActive] = useState<Kind>("sprint_summary");
@@ -65,19 +66,33 @@ function AiPage() {
 
   const runInsight = useServerFn(generateInsight);
   const run = useMutation({
-    mutationFn: (kind: Kind) =>
-      runInsight({
+    mutationFn: (kind: Kind) => {
+      const userApiKey = typeof window !== "undefined" ? window.localStorage.getItem("orbit_gemini_api_key") || undefined : undefined;
+      return runInsight({
         data: {
           kind,
           organizationId: orgId!,
+          userApiKey,
           ...(kind === "task_generator" && topic.trim() ? { topic: topic.trim() } : {}),
         },
-      }),
+      });
+    },
     onSuccess: (data) => {
       setResult(data.text);
       void history.refetch();
     },
-    onError: (error: Error) => toast.error(error.message || "AI request failed."),
+    onError: (error: Error) => {
+      if (error.message?.includes("Settings") || error.message?.includes("API key")) {
+        toast.error(error.message, {
+          action: {
+            label: "Open Settings",
+            onClick: () => void navigate({ to: "/settings" }),
+          },
+        });
+      } else {
+        toast.error(error.message || "AI request failed.");
+      }
+    },
   });
 
   return (

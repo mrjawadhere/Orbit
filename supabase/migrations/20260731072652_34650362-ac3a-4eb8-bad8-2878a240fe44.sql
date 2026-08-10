@@ -372,67 +372,64 @@ BEGIN
   v_name := COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1));
 
   INSERT INTO public.profiles (id, email, full_name, job_title)
-  VALUES (NEW.id, NEW.email, v_name, 'Product Lead');
+  VALUES (NEW.id, NEW.email, v_name, 'Chief Technology Officer');
 
   INSERT INTO public.organizations (name, slug, plan, created_by)
-  VALUES ('Acme Studio', 'acme-studio-' || substr(NEW.id::text, 1, 8), 'pro', NEW.id)
+  VALUES ('Digital Softs', 'digital-softs-' || substr(NEW.id::text, 1, 8), 'pro', NEW.id)
   RETURNING id INTO v_org;
 
   INSERT INTO public.memberships (organization_id, user_id, role) VALUES (v_org, NEW.id, 'owner');
 
   INSERT INTO public.subscriptions (organization_id, plan, seats, renews_at)
-  VALUES (v_org, 'pro', 12, CURRENT_DATE + 30);
+  VALUES (v_org, 'pro', 25, CURRENT_DATE + 30);
 
   INSERT INTO public.invoices (organization_id, number, amount_cents, status, issued_on) VALUES
-    (v_org, 'ORB-1043', 14400, 'paid', CURRENT_DATE - 30),
-    (v_org, 'ORB-1029', 14400, 'paid', CURRENT_DATE - 60),
-    (v_org, 'ORB-1012', 12000, 'paid', CURRENT_DATE - 90);
+    (v_org, 'DS-2026-08', 29000, 'paid', CURRENT_DATE - 30),
+    (v_org, 'DS-2026-07', 29000, 'paid', CURRENT_DATE - 60),
+    (v_org, 'DS-2026-06', 25000, 'paid', CURRENT_DATE - 90);
 
   INSERT INTO public.projects (organization_id, name, description, color, status, priority, owner_id, deadline, progress)
-  VALUES (v_org, 'Mobile Redesign', 'Rebuild the mobile experience around the new design system.', '#5B5CEB', 'active', 'high', NEW.id, CURRENT_DATE + 14, 67)
+  VALUES (v_org, 'PetroPulse — Upstream Drilling & Seismic Engine', 'Real-time offshore drilling telemetry, 3D seismic mesh rendering, wellhead pressure monitoring, and AI predictive maintenance for rigs.', '#EAB308', 'active', 'urgent', NEW.id, CURRENT_DATE + 14, 76)
   RETURNING id INTO v_p1;
   INSERT INTO public.projects (organization_id, name, description, color, status, priority, owner_id, deadline, progress)
-  VALUES (v_org, 'Billing Platform', 'Usage metering, invoices and plan upgrades.', '#7C3AED', 'active', 'urgent', NEW.id, CURRENT_DATE + 28, 42)
+  VALUES (v_org, 'RefineOps — Refinery Yield Optimization & SCADA', 'Downstream crude refining process simulator, distillation yield optimizer, tank farm inventory manager, and Modbus/OPC UA sensor hub.', '#EF4444', 'active', 'high', NEW.id, CURRENT_DATE + 28, 64)
   RETURNING id INTO v_p2;
   INSERT INTO public.projects (organization_id, name, description, color, status, priority, owner_id, deadline, progress)
-  VALUES (v_org, 'Growth Experiments', 'Onboarding funnel and activation tests.', '#00C2FF', 'planning', 'medium', NEW.id, CURRENT_DATE + 45, 18)
+  VALUES (v_org, 'PipelineShield — Pipeline Integrity & Leak Detection', 'Acoustic leak detection algorithms, IoT pipeline telemetry, GIS pipeline mapping, and cathodic protection monitoring.', '#10B981', 'active', 'urgent', NEW.id, CURRENT_DATE + 10, 88)
   RETURNING id INTO v_p3;
   INSERT INTO public.projects (organization_id, name, description, color, status, priority, owner_id, deadline, progress)
-  VALUES (v_org, 'Enterprise Security', 'SSO, audit exports and data retention controls.', '#10B981', 'completed', 'high', NEW.id, CURRENT_DATE - 7, 100)
+  VALUES (v_org, 'Digital Softs Enterprise Suite', 'Next-gen enterprise software suite with real-time analytics, order tracking, and client portal.', '#5B5CEB', 'active', 'high', NEW.id, CURRENT_DATE + 35, 84)
   RETURNING id INTO v_p4;
 
   INSERT INTO public.project_members (project_id, user_id, organization_id) VALUES
     (v_p1, NEW.id, v_org), (v_p2, NEW.id, v_org), (v_p3, NEW.id, v_org), (v_p4, NEW.id, v_org);
 
   INSERT INTO public.tasks (organization_id, project_id, title, description, status, priority, assignee_id, reporter_id, labels, due_date, estimated_hours, completed_hours, completed_at) VALUES
-    (v_org, v_p1, 'Empty states audit', 'Review every empty state and align with the new illustration set.', 'in_progress', 'high', NEW.id, NEW.id, ARRAY['design','ux'], CURRENT_DATE + 3, 8, 5, NULL),
-    (v_org, v_p1, 'Motion spec for navigation', 'Define transition curves and durations for the tab bar.', 'in_review', 'medium', NEW.id, NEW.id, ARRAY['design'], CURRENT_DATE + 5, 6, 6, NULL),
-    (v_org, v_p1, 'Ship dark mode tokens', 'Replace hardcoded colors with semantic tokens.', 'done', 'medium', NEW.id, NEW.id, ARRAY['frontend'], CURRENT_DATE - 2, 10, 9, now() - interval '2 days'),
-    (v_org, v_p2, 'Usage metering pipeline', 'Aggregate seat and task usage per organization daily.', 'in_progress', 'urgent', NEW.id, NEW.id, ARRAY['backend'], CURRENT_DATE + 6, 20, 11, NULL),
-    (v_org, v_p2, 'Invoice PDF templates', 'Branded invoice layout with tax fields.', 'todo', 'medium', NEW.id, NEW.id, ARRAY['backend','design'], CURRENT_DATE + 12, 12, NULL, NULL),
-    (v_org, v_p2, 'Plan upgrade flow', 'In-app upgrade with proration preview.', 'backlog', 'high', NULL, NEW.id, ARRAY['frontend'], CURRENT_DATE + 20, 16, NULL, NULL),
-    (v_org, v_p3, 'Onboarding checklist', 'Five-step activation checklist with progress.', 'in_progress', 'medium', NEW.id, NEW.id, ARRAY['growth'], CURRENT_DATE + 9, 9, 3, NULL),
-    (v_org, v_p3, 'Referral experiment brief', 'Define hypothesis and success metrics.', 'todo', 'low', NULL, NEW.id, ARRAY['growth'], CURRENT_DATE + 15, 4, NULL, NULL),
-    (v_org, v_p4, 'SAML SSO rollout', 'Enterprise identity provider support.', 'done', 'high', NEW.id, NEW.id, ARRAY['security'], CURRENT_DATE - 10, 24, 22, now() - interval '10 days'),
-    (v_org, v_p4, 'Audit log exports', 'CSV export of the full activity timeline.', 'done', 'medium', NEW.id, NEW.id, ARRAY['security'], CURRENT_DATE - 5, 14, 13, now() - interval '5 days'),
-    (v_org, v_p1, 'QA pass on iOS 18', 'Regression sweep before launch.', 'todo', 'urgent', NULL, NEW.id, ARRAY['qa'], CURRENT_DATE - 1, 8, NULL, NULL),
-    (v_org, v_p2, 'Dunning emails', 'Automate failed payment reminders.', 'backlog', 'low', NULL, NEW.id, ARRAY['backend'], CURRENT_DATE + 30, 6, NULL, NULL);
+    (v_org, v_p1, 'SCADA Modbus & OPC UA Telemetry Pipeline', 'High-throughput ingestion service for wellhead pressure and flow sensors.', 'in_progress', 'urgent', NEW.id, NEW.id, ARRAY['petroleum','scada','iot'], CURRENT_DATE + 3, 16, 10, NULL),
+    (v_org, v_p1, '3D Seismic Mesh Subsurface Renderer', 'WebGL/Three.js volumetric rendering engine for seismic survey interpretation.', 'in_review', 'high', NEW.id, NEW.id, ARRAY['petroleum','graphics','ai'], CURRENT_DATE + 5, 24, 24, NULL),
+    (v_org, v_p1, 'Offshore Rig Emergency ESD Interlock System', 'Fail-safe automated emergency shutdown logic for high-pressure gas blowouts.', 'done', 'urgent', NEW.id, NEW.id, ARRAY['petroleum','safety'], CURRENT_DATE - 2, 20, 20, now() - interval '2 days'),
+    (v_org, v_p2, 'Crude Oil Distillation Heat Exchanger Simulator', 'Simulate temperature gradients & thermodynamic equilibrium across fractioning towers.', 'in_progress', 'urgent', NEW.id, NEW.id, ARRAY['refinery','simulation','backend'], CURRENT_DATE + 4, 20, 12, NULL),
+    (v_org, v_p2, 'Crude Assay Property Calculator & Blending Engine', 'Calculate API gravity, sulfur content, and octane ratings for custom refinery blends.', 'todo', 'high', NEW.id, NEW.id, ARRAY['refinery','algorithm'], CURRENT_DATE + 8, 14, NULL, NULL),
+    (v_org, v_p2, 'Tank Farm Real-time Hydrostatic Volume Compensator', 'Adjust crude oil storage tank volumes for thermal expansion and API gravity shifts.', 'done', 'medium', NEW.id, NEW.id, ARRAY['refinery','iot'], CURRENT_DATE - 4, 12, 12, now() - interval '4 days'),
+    (v_org, v_p3, 'Acoustic Pipeline Leak Detection ML Algorithm', 'Analyze acoustic sensor waveforms to detect pressure drops and micro-fractures.', 'in_progress', 'urgent', NEW.id, NEW.id, ARRAY['pipeline','ai','dsp'], CURRENT_DATE + 2, 22, 16, NULL),
+    (v_org, v_p3, 'GIS Pipeline Asset Telemetry Map Layer', 'Overlay live flow rate and cathodic protection voltages on interactive Mapbox GIS map.', 'done', 'high', NEW.id, NEW.id, ARRAY['gis','frontend','pipeline'], CURRENT_DATE - 3, 16, 16, now() - interval '3 days'),
+    (v_org, v_p4, 'Wholesale Fuel Loading Gantry API', 'Automated authorization and metering for fuel tanker terminal loading racks.', 'in_progress', 'high', NEW.id, NEW.id, ARRAY['terminal','billing','api'], CURRENT_DATE + 6, 14, 8, NULL);
 
   INSERT INTO public.activity_logs (organization_id, actor_id, action, entity_type, entity_id, summary) VALUES
-    (v_org, NEW.id, 'project.created', 'project', v_p1, 'Created project Mobile Redesign'),
-    (v_org, NEW.id, 'task.completed', 'task', NULL, 'Completed Ship dark mode tokens'),
-    (v_org, NEW.id, 'project.completed', 'project', v_p4, 'Marked Enterprise Security as completed'),
-    (v_org, NEW.id, 'member.invited', 'membership', NULL, 'Invited 3 teammates to Acme Studio'),
-    (v_org, NEW.id, 'settings.updated', 'organization', v_org, 'Updated workspace appearance settings');
+    (v_org, NEW.id, 'project.created', 'project', v_p1, 'Created project Digital Softs Enterprise Suite'),
+    (v_org, NEW.id, 'task.completed', 'task', NULL, 'Completed Dark Mode Semantic Tokens'),
+    (v_org, NEW.id, 'project.completed', 'project', v_p3, 'Deployed Cloud DevOps & Zero-Trust Migration to production'),
+    (v_org, NEW.id, 'member.invited', 'membership', NULL, 'Invited 5 engineering leads to Digital Softs'),
+    (v_org, NEW.id, 'settings.updated', 'organization', v_org, 'Updated workspace appearance & AI settings');
 
   INSERT INTO public.notifications (organization_id, user_id, type, title, body) VALUES
-    (v_org, NEW.id, 'task_assigned', 'You were assigned “Empty states audit”', 'Due in 3 days in Mobile Redesign.'),
-    (v_org, NEW.id, 'deadline', 'QA pass on iOS 18 is overdue', 'This task was due yesterday.'),
-    (v_org, NEW.id, 'project_completed', 'Enterprise Security is complete', 'All 12 tasks are done. Nice work.');
+    (v_org, NEW.id, 'task_assigned', 'You were assigned “Zero-Trust IAM Role Audit”', 'Due in 3 days in Digital Softs Enterprise Suite.'),
+    (v_org, NEW.id, 'deadline', 'Load Testing API Gateways is scheduled for this week', 'QA team is ready for benchmark run.'),
+    (v_org, NEW.id, 'project_completed', 'Cloud DevOps Migration milestone reached', 'All EKS terraform modules applied cleanly.');
 
   INSERT INTO public.ai_history (organization_id, user_id, kind, prompt, response) VALUES
-    (v_org, NEW.id, 'weekly_report', 'Summarize this week for the leadership update.',
-     'The team completed 42 tasks (+24% week over week). Mobile Redesign is 67% complete and on track; Billing Platform is at risk with two unassigned blockers. Recommend rebalancing QA before Friday.');
+    (v_org, NEW.id, 'weekly_report', 'Summarize this week for Digital Softs executive leadership.',
+     'Digital Softs completed 48 engineering tasks (+28% velocity WoW). Cloud DevOps Migration reached 92% completion with multi-region failover tested cleanly. FinTech Mobile App v3 is on track for beta deployment next month.');
 
   FOR i IN 0..29 LOOP
     INSERT INTO public.analytics_snapshots (organization_id, captured_on, tasks_completed, tasks_created, active_projects, completion_rate)

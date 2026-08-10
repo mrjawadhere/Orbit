@@ -12,7 +12,7 @@ Orbit is built with a modern, high-performance web architecture:
 * **Routing & SSR**: **TanStack Start** (combining TanStack Router + Vite + Nitro Server engine) to support Server-Side Rendering (SSR) and lightning-fast client-side navigation.
 * **Database & Auth**: **Supabase (PostgreSQL)** utilizing **Row Level Security (RLS)** to enforce rigid tenant isolation.
 * **State Management**: **TanStack Query** for client-side caching and API state synchronization.
-* **AI Engine**: Dynamic gateway (`src/lib/ai-gateway.server.ts`) supporting **Google Gemini API** (via OpenAI compatibility) or Lovable AI Gateway for generating productivity summaries.
+* **AI Engine**: Dynamic gateway (`src/lib/ai-gateway.server.ts`) supporting **Google Gemini API** (via OpenAI compatibility) for generating productivity summaries.
 
 ---
 
