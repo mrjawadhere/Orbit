@@ -8,13 +8,13 @@ function applyTheme(theme: Theme) {
   document.documentElement.classList.toggle("dark", theme === "dark");
 }
 
-/** Persisted light/dark theme. Defaults to Orbit's dark brand surface. */
+/** Persisted light/dark theme. Defaults to Orbit's light surface. */
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    const next: Theme = stored === "light" || stored === "dark" ? stored : "dark";
+    const next: Theme = stored === "light" || stored === "dark" ? stored : "light";
     setTheme(next);
     applyTheme(next);
   }, []);
