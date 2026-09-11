@@ -1,6 +1,6 @@
 # 🌌 Orbit — Multi-Tenant AI Project Delivery Workspace
 
-Orbit is a production-ready, multi-tenant SaaS project management and delivery application. It is designed to group tasks, projects, workspaces, team roles, billing stubs, and audit trails under a secure, scalable model with built-in Google Gemini AI insights.
+Orbit is a production-ready, multi-tenant SaaS project management and delivery application. It is designed to group tasks, projects, workspaces, team roles, billing stubs, and audit trails under a secure, scalable model with built in Google Gemini AI insights.
 
 ---
 
