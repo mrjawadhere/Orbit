@@ -6,7 +6,7 @@ Orbit is a production-ready, multi-tenant SaaS project management and delivery a
 
 ## 🏗️ Tech Stack & Architecture
 
-Orbit is built with a modern, high-performance web architecture:
+Orbit is built with a modern high-performance web architecture:
 
 * **Frontend**: **React 19** with **Tailwind CSS v4** and **shadcn/ui** components for a responsive dashboard.
 * **Routing & SSR**: **TanStack Start** (combining TanStack Router + Vite + Nitro Server engine) to support Server-Side Rendering (SSR) and lightning-fast client-side navigation.
