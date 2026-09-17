@@ -37,7 +37,7 @@ Orbit is built with a modern high-performance web architecture:
 ### 1. Installation
 Clone the repository and install the dependencies:
 ```bash
-git clone <your-repo-url>
+git Clone <your-repo-url>
 cd Orbit
 npm install
 ```
@@ -125,3 +125,4 @@ npm run preview
    * **Install Command**: `npm install`
 4. Add all environment variables from `.env.example` (including `NITRO_PRESET=vercel`).
 5. Deploy and add the deployment domain to your Supabase Auth allowed redirects.
+6. Make it a proper SAAS App
